@@ -48,14 +48,14 @@ class ScrapStackOverflow:
             Raises
             ------
             TypeError
-                If no sound is set for the animal or passed in as a
-                parameter.
+                if tab isnt a valid member of StackTab Enum, Type Error is raised.
             
         """
         if not isinstance(tab, StackTab):
             raise TypeError("tab must be an instance of StackTab Enum")
 
         self.__url = tab.value
+        self.__items = []
 
     @property
     def scrapped_url(self) -> str:
@@ -87,24 +87,31 @@ class ScrapStackOverflow:
         if not isinstance(num_of_samples, int):
             raise TypeError("integer expected for num_of_samples")
 
-        items = []
         page_count = round(num_of_samples/50) if round(num_of_samples % 100) == 0 else round(num_of_samples/ 100) + 1
-        self.__combinedProcessing(page_count)
+        self.__combinedProcessing(page_count, num_of_samples)
 
-        return pd.DataFrame(items)
+        return pd.DataFrame(self.__items)
 
-    def  __combinedProcessing(self, page_count) -> None:
+    def  __combinedProcessing(self, page_count, num_of_samples) -> None:
         """
             Run the processing
         """
         for num in range(0, page_count):
             url = f"{self.__url}&page={num}"
             page_content = self.__get_page_content(url)
-            self.__scrap_content(page_content[1])
-            #print(type(page_content))
-            print(type(page_content[1]))
+            self.__scrap_content(page_content[1], num_of_samples)
+            
 
     def __get_page_content(self, url: str) -> tuple:
+        """
+            Scraps a html content of the url
+
+            Returns
+            -------
+            Tuple
+                a tuple of status code and html content
+            """
+
         headers = {
         'upgrade-insecure-requests': '1',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36 Edg/91.0.864.54',
@@ -119,7 +126,40 @@ class ScrapStackOverflow:
         read_site = requests.get(url, headers=headers)
         return read_site.status_code, read_site.content
 
-    def __scrap_content(self, content) -> List:
-        pass
+    def __scrap_content(self, content:str, num_of_samples:int) -> None:
+        """
+            Scrap the Html content to get required sections into a List
+        """
+        soup = BeautifulSoup(content, "html.parser")
+        for info in soup.find_all(class_ = "question-summary"):
+            tags = ""
+            for tag in info.find_all("a", "post-tag flex--item"):
+                tags = f"{tags} : {tag.text}"
 
-ScrapStackOverflow(StackTab.ACTIVE).scrap(10)
+
+            user = user_url =  ""
+            for usr in info.find_all("div", "user-details"):
+                user = usr.a.text
+                user_url = usr.a['href']
+
+            self.__items.append(
+                {
+                    'id': info['id'],
+                    'question': info.find("h3").text,
+                    'question_url': info.a['href'],
+                    'summary': info.find("div", "excerpt").text,
+                    'tags': tags,
+                    'question_time': info.find("span", "relativetime").attrs['title'], 
+                    'user': user,  
+                    'user_url': user_url,
+                    'user_badge': info.find("span", "v-visible-sr").text, 
+                    'user_reputation_score': info.find("span", "reputation-score").text, 
+                    'votes': info.find("span", "vote-count-post").text,
+                    'answer': info.find("div", "status").text,
+                    'views': info.find("div", "views").text
+                }
+            )
+            if len(self.__items) >= num_of_samples:
+                break
+
+
