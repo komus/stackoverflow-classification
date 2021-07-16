@@ -18,7 +18,7 @@ setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: OS Independent",
     ],
-    url="https://github.com/komus/stackoverflow-classification/tree/pypi_scrapping",
+    url="https://github.com/komus/stackoverflow-classification/tree/pypi_scrapping/scrapping",
     author="Oyindolapo Komolafe",
     author_email="oyindolapokomolafe@yahoo.com",
 
