@@ -2,6 +2,13 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,virtualenv
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,visualstudiocode,virtualenv
 
+vstack/
+*.csv#
+
+*.csv
+*.odp#
+
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
