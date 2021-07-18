@@ -27,3 +27,32 @@ from scrapso import StackTab, ScrapStackOverflow
 The data is trained using Decision Tree and KMeans
 
 ## Prediction of Question classification
+```
+https://stackoverflow-classificiation.herokuapp.com/
+
+```
+### Endpoint `
+The endpoint `/predict` accepts csv of structure from scrapping package.
+``` http
+POST predict/
+```
+|Accepted file type |  Parameter name         |  Description           |
+|----------|:-------------:|-----------------------:|
+| `csv` |  `file`  | Features of the questions|
+
+
+## Responses
+sucesss response for `POST predict/`
+``` javascript
+{
+  "status_code": 100,
+  "status_message": "Prediction Conputed",
+  "data": "[3 3 3 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3]"
+}
+```
+
+The `GET predict/` returns Top 10 requests made to the  `POST` endpoint
+``` http
+GET predict/
+```
+
