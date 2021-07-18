@@ -12,6 +12,9 @@ from class_lib.data_processing import *
 ALLOWED_EXTENSIONS = {'csv'}
 
 def allowed_file(filename):
+    """
+        Check if uploaded files are compatible
+    """
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 

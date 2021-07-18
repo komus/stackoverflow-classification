@@ -29,6 +29,9 @@ preprocessing = PreProcessing()
 predict_model = PredictUsingModel()
 
 def clean_files(data):
+    """
+        function to perform preprocessing and predictions
+    """
     s=str(data,'utf-8')
     data = StringIO(s) 
     df=pd.read_csv(data)
@@ -36,20 +39,25 @@ def clean_files(data):
     if isinstance(cleaned_data, pd.DataFrame):
         #predicted_val_kmeans = predict_model.predictUsingKmeans(cleaned_data)
         predicted_val_dt = predict_model.predictUsingDT(cleaned_data)
-        insert_into_db(cleaned_data, predicted_val_dt)
+        insert_into_db(df, predicted_val_dt)
         return predicted_val_dt
     else:
         return cleaned_data
     
     
 def insert_into_db(input, output) -> None:
+    """
+        Insert input and output into the database
+    """
     with db_engine.connect() as conn:
         query = f'''INSERT INTO predictions(user_input, predicted_output) VALUES (:input_val, :output_val)'''
         result = conn.execute(text(query), input_val = str(input), output_val = str(output))
         
 
 def get_top_10_prediction() -> pd.DataFrame:
-    
+    """
+        Get TOP 10 Predictions
+    """
     query = f'SELECT p.user_input, p.predicted_output, p.txtdate FROM predictions p ORDER BY p.txtdate DESC LIMIT 10'
     result = pd.read_sql_query(query, db_engine)
     return result

@@ -11,7 +11,13 @@ from pathlib import Path
 
 
 class PreProcessing:
+    """
+        Preprocessing class cleans up the data and gets it ready for model prediction
+    """
     def __init__(self) -> None:
+        """
+            Initializes and opens models
+        """
         model_pkl_filename = MODELS_PATH + 'labelencoding.pkl'
         with open(model_pkl_filename, "rb") as f:
             self.__lb_encode = pickle.load(f)
@@ -21,6 +27,9 @@ class PreProcessing:
             self.__ohe_encode = pickle.load(f)
     
     def clean_files(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+            Clean input data and feature extraction
+        """
         try:
             data = self.__clean_up_columns(data)
             stack_features = self.__fill_empty(data)
@@ -36,6 +45,9 @@ class PreProcessing:
             return f"{error}"
     
     def __clean_up_columns(self, data:pd.DataFrame) -> pd.DataFrame:
+        """
+            CLean columns
+        """
         data = data.drop(columns='Unnamed: 0')
         data['id'] = data['id'].apply(lambda x: x[x.find('question-summary-') + 17:]).astype(int)
         data['answer']=data['answer'].str.extract(r'(\d)').astype(int)
@@ -51,6 +63,9 @@ class PreProcessing:
         return data
 
     def __fill_empty(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+            Replace empty columns with 0 or NaN
+        """
         stack_features = data[['user_reputation_score', 'votes','answer', 'views', 'accepted_answer', 'user_badge_number','user_badge_type', 'tags_count', 'days_in_queue']]
         for col in categorical:
             stack_features[col] = stack_features[col].replace(r'^\s*$', 'NaN', regex=True)
@@ -61,10 +76,16 @@ class PreProcessing:
         return stack_features
 
     def __label_encode(self, data:pd.DataFrame) -> pd.DataFrame:
+        """
+            Label encode categorical columns
+        """
         data['encoded_user_badge'] = self.__lb_encode.transform(data['user_badge_type'])
         return data
 
     def __one_hot_encode(self, data:pd.DataFrame) -> pd.DataFrame:
+        """
+            Convert the label encoded column to one hot encode
+        """
         encoded_badge = self.__ohe_encode.transform(data[['encoded_user_badge']]).toarray()
         encoded_badge = pd.DataFrame(encoded_badge)
         stack_features = pd.merge(data, encoded_badge, left_index=True, right_index=True)
@@ -72,7 +93,13 @@ class PreProcessing:
 
 
 class PredictUsingModel:
+    """
+        Predict the cleaned data
+    """
     def __init__(self) -> None:
+        """
+        Initialize the trained models
+        """
         model_pkl_filename = MODELS_PATH + 'kmeans_3_clusters.pkl'
         with open(model_pkl_filename, "rb") as f:
             self.__kmeans = pickle.load(f)
@@ -82,11 +109,17 @@ class PredictUsingModel:
             self.__decisiontree = pickle.load(f)
 
     def predictUsingKmeans(self, data:pd.DataFrame) -> np.array:
+        """
+            Predict using Kmeans
+        """
         data = data.drop(columns=['user_badge_type','encoded_user_badge'])
         labels =  self.__kmeans.predict(data)
         return labels
 
     def predictUsingDT(self, data:pd.DataFrame) -> np.array:
+        """
+            Predict using Decision Tree
+        """
         data = data.drop(columns=['user_badge_type', 'tags_count', 'encoded_user_badge'])
         predicted_class = self.__decisiontree.predict(data)
         return predicted_class
