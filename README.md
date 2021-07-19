@@ -1,6 +1,7 @@
 # Scrapping and Classification of Stackoverflow Questions
 
-Stackoverflow is a website to ask questions and receive answers. It hass over 25million active question. This project is tailored towards scrapping stackoverflow website then classify the data. 
+Stackoverflow is a website to ask questions and receive answers. It has over 25million active question. 
+This project is tailored towards scrapping stackoverflow website then using the scrapped data to predict number of optimal tags and classify the question
 
 
 # Usage

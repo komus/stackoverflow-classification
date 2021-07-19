@@ -118,7 +118,7 @@ class PredictUsingModel:
 
     def predictUsingDT(self, data:pd.DataFrame) -> np.array:
         """
-            Predict using Decision Tree
+            Predict Optimal Number of Tags using Decision Tree
         """
         data = data.drop(columns=['user_badge_type', 'tags_count', 'encoded_user_badge'])
         predicted_class = self.__decisiontree.predict(data)

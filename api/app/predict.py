@@ -23,7 +23,7 @@ class SaySomething(Resource):
         return {"Welcome": "Welcome to my StackOverflow Modelling"}
 
 
-class PredictUsingKmeans(Resource):
+class PredictUsingKmeansandDT(Resource):
     def get(self):
         data = get_top_10_prediction()
         return {'status_code':  API_Status.OKAY,
@@ -42,10 +42,14 @@ class PredictUsingKmeans(Resource):
                 #dat = pd.read_csv(fil)
                 data = file.read()
                 input = clean_files(data)
-                if isinstance(input, np.ndarray):
+                if isinstance(input, tuple):
+                    result = {
+                        "predicted_tag_numbers": str(input[0]),
+                        "predicted_class": str(input[1])
+                    }
                     return {'status_code':  API_Status.OKAY,
                             'status_message':API_Status_Message.PREDICT, 
-                            'data': str(input)}, 200
+                            'data': result}, 200
                 else:
                     return {'status_code':  API_Status.BAD_PAYLOAD,
                     'status_message':input, 

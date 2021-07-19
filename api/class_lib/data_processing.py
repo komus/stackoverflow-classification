@@ -39,25 +39,26 @@ def clean_files(data):
     if isinstance(cleaned_data, pd.DataFrame):
         #predicted_val_kmeans = predict_model.predictUsingKmeans(cleaned_data)
         predicted_val_dt = predict_model.predictUsingDT(cleaned_data)
-        insert_into_db(df, predicted_val_dt)
-        return predicted_val_dt
+        predicted_class = predict_model.predictUsingKmeans(cleaned_data)
+        insert_into_db(data, predicted_val_dt, predicted_class)
+        return (predicted_val_dt, predicted_class)
     else:
         return cleaned_data
     
     
-def insert_into_db(input, output) -> None:
+def insert_into_db(input, p_tag, p_class) -> None:
     """
         Insert input and output into the database
     """
     with db_engine.connect() as conn:
-        query = f'''INSERT INTO predictions(user_input, predicted_output) VALUES (:input_val, :output_val)'''
-        result = conn.execute(text(query), input_val = str(input), output_val = str(output))
+        query = f'''INSERT INTO predictions(user_input, predicted_tags, predicted_class) VALUES (:input_val, :output_val, :output_class)'''
+        result = conn.execute(text(query), input_val = str(input), output_val = str(p_tag), output_class = str(p_class))
         
 
 def get_top_10_prediction() -> pd.DataFrame:
     """
         Get TOP 10 Predictions
     """
-    query = f'SELECT p.user_input, p.predicted_output, p.txtdate FROM predictions p ORDER BY p.txtdate DESC LIMIT 10'
+    query = f'SELECT p.user_input, p.predicted_tags, p.predicted_class, p.txtdate FROM predictions p ORDER BY p.txtdate DESC LIMIT 10'
     result = pd.read_sql_query(query, db_engine)
     return result
