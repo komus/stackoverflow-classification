@@ -8,7 +8,7 @@ api = Api(app)
 
 
 api.add_resource(SaySomething, '/')
-api.add_resource(PredictUsingKmeans, '/predict')
+api.add_resource(PredictUsingKmeansandDT, '/predict')
 
 
 if __name__ == '__main__':
